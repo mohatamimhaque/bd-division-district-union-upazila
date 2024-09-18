@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" integrity="sha512-pumBsjNRGGqkPzKHndZMaAG+bir374sORyzM3uulLV14lN5LyykqNk8eEeUlUkB3U0M4FApyaHraT65ihJhDpQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+  <input type="file" id="input" />
+
+<textarea name="" id="text" cols="50" rows="100"></textarea>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+  <script>
+    const input = document.getElementById('input');
+const text = document.getElementById('text');
+let myObj = {};
+
+input.addEventListener('change', () => {
+  const file = input.files[0];
+  const reader = new FileReader();
+
+  reader.onload = (event) => {
+    const data = event.target.result;
+    const workbook = XLSX.read(data, { type: 'binary' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+    //console.log(jsonData);
+   
+   
+   for(let i=2501;i<jsonData.length;i++){
+     let arr = Object.values(jsonData[i])
+     if(arr[0].toLowerCase()!== 'division'){
+      
+       let data = {
+         division:arr[0],
+         district:arr[1],
+         upazila:arr[2],
+         union:arr[3]
+
+}
+//alert('');
+
+$.ajax({
+  url: "upload.php",
+ method: 'POST',
+  data: data,
+  success: function(response) {
+     text.innerHTML+=`${i}:${response}\n`;
+  },
+  error: function(xhr, status, error) {
+   text.innerHTML+=`${i}=error:${error}\n`;
+  }
+});
+
+
+  
+     /*  text.innerHTML += `serial:${i}
+         division:${arr[0]},
+         district:${arr[1]},
+         upazila:${arr[2]},
+         union:${arr[3]}\n`;
+         */
+       console.log(data)
+       
+     }
+   }
+  };
+
+  reader.readAsBinaryString(file);
+});
+
+    
+  </script>
+</body>
+</html>
